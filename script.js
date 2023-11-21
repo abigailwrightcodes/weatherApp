@@ -1,84 +1,97 @@
 
+citiesArray = []
 
-var cities = []
+function displayCurrentWeather () {
+    currentCity =$(this).attr("data-name");
+    currentWeatherApiURL = "https://api.openweathermap.org/data/2.5/weather?q=" + citiesArray + "&appid=6de479150326f489e578ba2e14273c0b";
 
-
-function displayWeather() {
-    var city = $(this).attr("data-name");
-    var apiURL =  "https://api.openweathermap.org/data/2.5/forecast?q=" + cities + "&appid=6de479150326f489e578ba2e14273c0b";
-
-  
-    fetch(apiURL)
-    .then(function (response) {
+    fetch(currentWeatherApiURL)
+    .then(function (response){
         return response.json();
     })
-    .then(function (data) {
-       console.log(data)
-    })
+    .then(function (currentWeatherData) {
+        console.log(currentWeatherData)
+
+
+        // CREATE CURRENT DIV
+
+        var currentWeatherDiv = $("<div>")
+        currentWeatherDiv.addClass("currentWeather")
+        $("#today").append(currentWeatherDiv)
+
+
+
+// CURRENT CITY HEADING - NAME, DATE ICON
+        var currentCityName = currentWeatherData.name
+        const currentDate = dayjs();
+        const formattedDate = currentDate. format('DD-MM-YY');
+        console. log(formattedDate);
+
+        // CURRENT ICON
+        var currentIcon = currentWeatherData.weather[0].icon
+        console.log(currentIcon)
+        var pageIcon = document.createElement("img")
+        pageIcon.src="http://openweathermap.org/img/wn/" + currentIcon + ".png"
+        // HEADING  
+        var heading = $("<h1>").text(currentCityName + " " + formattedDate)
+        currentWeatherDiv.append(heading, pageIcon)
+
+// CURRENT WEATHER CONDITIONS
+       
+        var currentCityTemp = currentWeatherData.main.temp
+        var currentCityTempCelsius = currentCityTemp -273.15
+        var myCityTempRound = currentCityTempCelsius.toFixed(2);
+        var currentTemp = $("<p>").text("The current Temperature is: " + myCityTempRound + " ℃" )
+
+
+        var currentHumidityData = currentWeatherData.main.humidity
+        var currentHumidity = $("<p>").text("Humidity: " + currentHumidityData + "%")
+
+        var currentWindData = currentWeatherData.wind.speed
+        var currentWind = $("<p>").text("Wind: " + currentWindData + " KPH")
+
+        currentWeatherDiv.append(currentTemp, currentHumidity, currentWind)
+    }
+    )
 }
+
+
+//CREATE BUTTONS
 
 function createButtons () {
-    $("#history").empty();
+   
+
+    for (var i=0; i < citiesArray.length; i++) {
+        var createBtn = $("<button>")
+        createBtn.addClass("cityBtn")
+        createBtn.attr("data-name" , citiesArray[i])
+        createBtn.text(citiesArray[i])
+        $("#history").prepend(createBtn)
+    }
 
 
-for (var i = 0; i <cities.length; i++) {
-    var createBtn = $("<button>")
-    createBtn.addClass("city-btn");
-    createBtn.attr("data-name", cities[i])
-    createBtn.text(cities[i])
-    $("#history").prepend(createBtn)
+
 }
 
-}
-
-
-
+// SEARCH INPUT
 $("#search-button").on("click", function(event){
 
     $("#history").empty();
-
-    event.preventDefault();
-    var city = $("#search-input").val().trim();
-    cities.push(city)
+    event.preventDefault()
+    var searchCityInput = $("#search-input").val().trim();
+    citiesArray.push(searchCityInput)
     createButtons()
+
+    displayCurrentWeather()
+
+
+
+    // SAVE TO LOCAL STORAGE
+ var searchCityInput = document.getElementById("search-input").value;
+localStorage.setItem("search", searchCityInput);
+
+var storedSearch = localStorage.getItem("search")
+
+console.log(storedSearch)
+
 })
-
-// This function handles events where one button is clicked
-$("#search-button").on("click", function (event) {
-    event.preventDefault();
-  
-    // This line grabs the input from the textbox
-    var city = $("#search-button").val().trim();
-  
-    // Adding the movie from the textbox to our array
-    cities.push(city);
-    console.log(cities);
-
-
-displayWeather()
-});
-
-
-
-
-// current weather 
-// * The city name
-// * The date
-// * An icon representation of weather conditions
-// * The temperature
-// * The humidity
-// * The wind speed
-
-var currentCity
-var currentDate
-var currentIcon
-var currentTemp
-var currentHumidity
-var currentWindSpeed
-
-// Five day forecast
-// * The date
-// * An icon representation of weather conditions
-// * The temperature
-// * The humidity
-// * When a user click on a city in the search history they are again presented with current and future conditions for that city
